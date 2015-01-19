@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CtripDB
+Bundle-SymbolicName: CtripDB
+Bundle-Version: 1.0.0.qualifier
+Bundle-Blueprint: OSGI-INF/blueprint/*.xml
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Meta-Persistence: 
+Import-Package: javax.persistence;version="1.1.0",
+ javax.sql;version="0.0.0",
+ javax.transaction;version="1.1.0"
+
