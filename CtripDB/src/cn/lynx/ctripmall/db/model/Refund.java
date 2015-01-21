@@ -10,7 +10,7 @@ import javax.persistence.OneToOne;
 public class Refund extends CtripEntity {
 	private long refundApplyId;
 	private long timestamp;
-	private short operateType;
+	private int operateType;
 	@OneToOne
 	private Order order;
 	private String remark;
@@ -33,11 +33,11 @@ public class Refund extends CtripEntity {
 		this.timestamp = timestamp;
 	}
 
-	public short getOperateType() {
+	public int getOperateType() {
 		return operateType;
 	}
 
-	public void setOperateType(short operateType) {
+	public void setOperateType(int operateType) {
 		this.operateType = operateType;
 	}
 
