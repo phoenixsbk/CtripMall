@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>退换货订单信息</title>
+<link rel="stylesheet" href="js/dijit/themes/claro/claro.css" />
+<script src="js/dojo/dojo.js" data-dojo-config="async: true"></script>
+<script src="js/hmac-md5.js"></script>
+<script>
+	var appid = "myapp";
+	var mykey = "mykey";
+	var reqProtocol = "https://";
+	var reqHost = "api.mall.ctrip.com";
+	var reqURI = "/mall-api/openapi/updateorderrefundinfo";
+	
+	var tdtag1a = "<tr><td width='250' align='right'><span for='ExProductID";
+	var tdtag1b = "' id='Span_ExProductID";
+	var tdtag1c = "'>商品编号:</span></td><td><input type='text' id='ExProductID";
+	var tdtag1d = "' name='ExProductID";
+	var tdtag1e = "' /></td></tr>";
+	
+	var tdtag2a = "<tr><td align='right'><span for='ExSubProductID";
+	var tdtag2b = "' id='Span_ExSubProductID";
+	var tdtag2c = "'>子商品编号:</span></td><td><input type='text' id='ExSubProductID";
+	var tdtag2d = "' name='ExSubProductID";
+	var tdtag2e = "' /></td></tr>";
+	
+	var tdtag3a = "<tr><td align='right'><span for='Quantity";
+	var tdtag3b = "' id='Span_Quantity";
+	var tdtag3c = "'>数量:</span></td><td><input type='text' id='Quantity";
+	var tdtag3d = "' name='Quantity";
+	var tdtag3e = "'/></td></tr>";
+	
+	var tdtag4 = "<tr><td colspan='2'>&nbsp;</td></tr>";
+	
+	function hmacmd5_crypt(data, key) {
+		return CryptoJS.HmacMD5(data, key);
+	}
+	
+	require(['dojo/on', 'dojo/dom', 'dojo/dom-construct', 'dojo/domReady!'], function(on, dom, domc) {
+		on(AddProductButton, "click", function() {
+			var counter = dom.byId("ProductCount").innerHTML;
+			counter = Number(counter) + 1;
+			dom.byId("ProductCount").innerHTML = counter;
+			var tag1 = tdtag1a + counter + tdtag1b + counter + tdtag1c + counter + tdtag1d + counter + tdtag1e;
+			var pr1 = domc.toDom(tag1);
+			domc.place(pr1, "ProductTable", "last");
+			
+			var tag2 = tdtag2a + counter + tdtag2b + counter + tdtag2c + counter + tdtag2d + counter + tdtag2e;
+			var pr2 = domc.toDom(tag2)
+			domc.place(pr2, "ProductTable", "last");
+			
+			var tag3 = tdtag3a + counter + tdtag3b + counter + tdtag3c + counter + tdtag3d + counter + tdtag3e;
+			var pr3 = domc.toDom(tag3);
+			domc.place(pr3, "ProductTable", "last");
+			
+			var tag4 = tdtag4;
+			var pr4 = domc.toDom(tag4);
+			domc.place(pr4, "ProductTable", "last");
+		})
+	})
+	
+	require(['dojo/dom', 'dojo/request/iframe', 'dojo/on', 'dojo/dom-construct',
+	         'dojo/json', 'dojo/domReady!'], function (dom, iframe, on, domc, JSON) {
+		on(submitButton, "click", function() {
+			var counter = dom.byId("ProductCount").innerHTML;
+			
+			var prodary = "[";
+			for (var i = 1;i <= counter;i ++) {
+				var prodstr = JSON.stringify({ exproductid : dom.byId("ExProductID" + i).value,
+						exsubproductid : dom.byId("ExSubProductID" + i).value,
+						quantity : dom.byId("Quantity" + i).value
+				});
+				if (i != 1) {
+					prodary += ",";
+				}
+				
+				prodary += prodstr;
+			}
+			prodary += "]";
+			
+			var datastr = JSON.stringify({
+				refundapplyid : dom.byId("RefundApplyID").value,
+				timestamp : dom.byId("TimeStamp").value,
+				flowcompanyname : dom.byId("FlowCompanyName").value,
+				flowticketnumber: dom.byId("FlowTicketNumber").value,
+				flowstatus: dom.byId("FlowStatus").value,
+				flowremark: dom.byId("FlowRemark").value,
+				productlist: JSON.parse(prodary)
+			});
+			
+			var signorigin = "refundapplyid=" + dom.byId("RefundApplyID").value + "&timestamp=" + dom.byId("TimeStamp").value + "&appid=" + appid;
+			var signstr = "" + hmacmd5_crypt(signorigin, mykey);
+			
+			console.debug(datastr);
+			console.debug(signstr);
+			
+			iframe(reqProtocol + reqHost + reqURI, {
+				data: {
+					data: datastr,
+					sign: signstr
+				}
+			}).then(function(text) {
+				console.debug(text);
+			}, function(err) {
+			});
+		})
+	});
+</script>
+</head>
+<body class="claro">
+	<table cellpadding="2" cellspacing="0" border="0" width="800" height="600">
+		<tr>
+			<td width="50"><span for="RefundApplyID" id="Span_RefundApplyID">退换货申请编号:</span></td>
+			<td><input type="text" id="RefundApplyID" name="RefundApplyID" /></td>
+		</tr>
+		<tr>
+			<td><span for="TimeStamp" id="Span_TimeStamp">当前时间</span></td>
+			<td><input type="text" id="TimeStamp" name="TimeStamp" /></td>
+		</tr>
+		<tr>
+			<td><span for="FlowCompanyName" id="Span_FlowCompanyName">物流公司名称:</span></td>
+			<td><input type="text" id="FlowCompanyName" name="FlowCompanyName" /></td>
+		</tr>
+		<tr>
+			<td><span for="FlowTicketNumber" id="Span_FlowTicketNumber">物流订单编号:</span></td>
+			<td><input type="text" id="FlowTicketNumber" name="FlowTicketNumber" /></td>
+		</tr>
+		<tr>
+			<td><span for="FlowStatus" id="Span_FlowStatus">物流配送状态:</span></td>
+			<td><select name="FlowStatus" id="FlowStatus">
+				<option value="0">配送中</option>
+				<option value="1">配送成功</option>
+				<option value="2">配送失败</option>
+			</select></td>
+		</tr>
+		<tr>
+			<td><span for="FlowRemark" id="Span_FlowRemark">物流备注:</span></td>
+			<td><input type="text" id="FlowRemark" name="FlowRemark" /></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table cellpadding="0" cellspacing="0" width="100%" border="0" id="ProductTable" data-dojo-id="ProductTable">
+					<tr>
+						<td width="50"><span for="ExProductID1" id="Span_ExProductID1">商品编号:</span></td>
+						<td><input type="text" id="ExProductID1" name="ExProductID1" /></td>
+					</tr>
+					<tr>
+						<td><span for="ExSubProductID1" id="Span_ExSubProductID1">子商品编号:</span></td>
+						<td><input type="text" id="ExSubProductID1" name="ExSubProductID1" /></td>
+					</tr>
+					<tr>
+						<td><span for="Quantity1" id="Span_Quantity1">数量:</span></td>
+						<td><input type="text" id="Quantity1" name="Quantity1" /></td>
+					</tr>
+					<tr>
+						<td colspan="2">&nbsp;</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<button id="submitButton" type="button" data-dojo-id="submitButton">提交</button>
+				<div style="display:none" id="ProductCount">1</div>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

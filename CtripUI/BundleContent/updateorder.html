@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<title>接收订单配送物流信息</title>
+<link rel="stylesheet" href="js/dijit/themes/dijit.css" />
+<link rel="stylesheet" href="js/dijit/themes/claro/claro.css" />
+<style type="text/css">
+html, body {
+	width: 100%;
+	height: 100%;
+}
+</style>
+<script type="text/javascript" src="js/hmac-md5.js"></script>
+<script type="text/javascript" src="js/dojo/dojo.js"
+	data-dojo-config="parseOnLoad: true, async: true, isDebug: true"></script>
+<script type="text/javascript">
+	require([ "dojo/parser", "dijit/layout/BorderContainer",
+			"dijit/layout/ContentPane", "dijit/form/TextBox",
+			"dijit/form/Button" ]);
+
+	var appid = "myapp";
+	var mykey = "mykey";
+	var reqProtocol = "https://";
+	var reqHost = "api.mall.ctrip.com";
+	var reqURI = "/mall-api/openapi/updateorderdelivery";
+
+	var tdtag1a = "<tr><td width='250' align='right'><span for='ExProductID";
+	var tdtag1b = "' id='Span_ExProductID";
+	var tdtag1c = "'>商品编号:</span></td><td><input type='text' id='ExProductID";
+	var tdtag1d = "' name='ExProductID";
+	var tdtag1e = "' /></td></tr>";
+
+	var tdtag2a = "<tr><td align='right'><span for='ExSubProductID";
+	var tdtag2b = "' id='Span_ExSubProductID";
+	var tdtag2c = "'>子商品编号:</span></td><td><input type='text' id='ExSubProductID";
+	var tdtag2d = "' name='ExSubProductID";
+	var tdtag2e = "' /></td></tr>";
+
+	var tdtag3a = "<tr><td align='right'><span for='Quantity";
+	var tdtag3b = "' id='Span_Quantity";
+	var tdtag3c = "'>数量:</span></td><td><input type='text' id='Quantity";
+	var tdtag3d = "' name='Quantity";
+	var tdtag3e = "'/></td></tr>";
+
+	var tdtag4 = "<tr><td colspan='2'>&nbsp;</td></tr>";
+
+	function hmacmd5_crypt(data, key) {
+		return CryptoJS.HmacMD5(data, key);
+	}
+
+	function AddProduct() {
+		require([ "dojo/dom", "dojo/dom-construct" ], function(dom, domc) {
+			var counter = dom.byId("ProductCount").innerHTML;
+			counter = Number(counter) + 1;
+			dom.byId("ProductCount").innerHTML = counter;
+			var tag1 = tdtag1a + counter + tdtag1b + counter + tdtag1c
+					+ counter + tdtag1d + counter + tdtag1e;
+			var pr1 = domc.toDom(tag1);
+			domc.place(pr1, "ProductTable", "last");
+
+			var tag2 = tdtag2a + counter + tdtag2b + counter + tdtag2c
+					+ counter + tdtag2d + counter + tdtag2e;
+			var pr2 = domc.toDom(tag2)
+			domc.place(pr2, "ProductTable", "last");
+
+			var tag3 = tdtag3a + counter + tdtag3b + counter + tdtag3c
+					+ counter + tdtag3d + counter + tdtag3e;
+			var pr3 = domc.toDom(tag3);
+			domc.place(pr3, "ProductTable", "last");
+
+			var tag4 = tdtag4;
+			var pr4 = domc.toDom(tag4);
+			domc.place(pr4, "ProductTable", "last");
+		});
+	}
+
+	function submitCtrip() {
+		require([ "dojo/dom", "dojo/request/iframe", "dojo/dom-construct",
+				"dojo/json" ], function(dom, iframe, domc, JSON) {
+			var counter = dom.byId("ProductCount").innerHTML;
+
+			var prodary = "[";
+			for (var i = 1; i <= counter; i++) {
+				var prodstr = JSON.stringify({
+					exproductid : dom.byId("ExProductID" + i).value,
+					exsubproductid : dom.byId("ExSubProductID" + i).value,
+					quantity : dom.byId("Quantity" + i).value
+				});
+				if (i != 1) {
+					prodary += ",";
+				}
+
+				prodary += prodstr;
+			}
+			prodary += "]";
+
+			var datastr = JSON.stringify({
+				orderid : dom.byId("OrderID").value,
+				timestamp : dom.byId("TimeStamp").value,
+				flowcompanyname : dom.byId("FlowCompanyName").value,
+				flowticketnumber : dom.byId("FlowTicketNumber").value,
+				flowstatus : dom.byId("FlowStatus").value,
+				flowremark : dom.byId("FlowRemark").value,
+				productlist : JSON.parse(prodary)
+			});
+
+			var signorigin = "orderid=" + dom.byId("OrderID").value
+					+ "&timestamp=" + dom.byId("TimeStamp").value + "&appid="
+					+ appid;
+			var signstr = "" + hmacmd5_crypt(signorigin, mykey);
+
+			console.debug(datastr);
+			console.debug(signstr);
+
+			iframe(reqProtocol + reqHost + reqURI, {
+				data : {
+					data : datastr,
+					sign : signstr
+				}
+			}).then(function(text) {
+				console.debug(text);
+			}, function(err) {
+			});
+		});
+	}
+</script>
+</head>
+<body class="claro">
+	<div data-dojo-type="dijit/layout/BorderContainer" id="BodyContainer"
+		style="width: 100%; height: 100%">
+		<div data-dojo-type="dijit/layout/ContentPane"
+			data-dojo-props="region: 'top'" style="height: 50px">
+			接收订单配送物流信息</div>
+		<div data-dojo-type="dijit/layout/ContentPane"
+			data-dojo-props="region: 'center'" style="width: 100px">
+			<table cellpadding="2" cellspacing="0" border="0" width="100%">
+				<tr>
+					<td width="150" align="right"><span id="Span_OrderID">订单编号:</span></td>
+					<td><div data-dojo-type="dijit/form/TextBox"
+							data-dojo-id="OrderID" id="OrderID"></div></td>
+				</tr>
+				<tr>
+					<td align="right"><span id="Span_TimeStamp">当前时间</span></td>
+					<td><div data-dojo-type="dijit/form/TextBox" id="TimeStamp"
+							data-dojo-id="TimeStamp"></div></td>
+				</tr>
+				<tr>
+					<td align="right"><span id="Span_FlowCompanyName">物流公司名称:</span></td>
+					<td><div data-dojo-type="dijit/form/TextBox"
+							id="FlowCompanyName" data-dojo-id="FlowCompanyName"></div></td>
+				</tr>
+				<tr>
+					<td align="right"><span id="Span_FlowTicketNumber">物流订单编号:</span></td>
+					<td><div data-dojo-type="dijit/form/TextBox"
+							id="FlowTicketNumber" data-dojo-id="FlowTicketNumber"></div></td>
+				</tr>
+				<tr>
+					<td align="right"><span id="Span_FlowStatus">物流配送状态:</span></td>
+					<td><select name="FlowStatus" id="FlowStatus"
+						data-dojo-id="FlowStatus" data-dojo-type="dijit/form/Select">
+							<option value="0">配送中</option>
+							<option value="1">配送成功</option>
+							<option value="2">配送失败</option>
+					</select></td>
+				</tr>
+				<tr>
+					<td align="right"><span id="Span_FlowRemark">物流备注:</span></td>
+					<td><div data-dojo-type="dijit/form/TextBox" id="FlowRemark"
+							data-dojo-id="FlowRemark"></div></td>
+				</tr>
+				<tr>
+					<td colspan="2" align="left">物流商品信息&nbsp;&nbsp;
+						<button type="button" id="AddProductButton"
+							data-dojo-id="AddProductButton"
+							data-dojo-type="dijit/form/Button" onClick="AddProduct">+</button>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table cellpadding="0" cellspacing="0" width="100%" border="0"
+							id="ProductTable" data-dojo-id="ProductTable">
+							<tr>
+								<td width="150" align="right"><span id="Span_ExProductID1">商品编号:</span></td>
+								<td><div data-dojo-type="dijit/form/TextBox"
+										id="ExProductID1" data-dojo-id="ExProductID1"></div></td>
+							</tr>
+							<tr>
+								<td align="right"><span id="Span_ExSubProductID1">子商品编号:</span></td>
+								<td><div data-dojo-type="dijit/form/TextBox"
+										id="ExSubProductID1" data-dojo-id="ExSubProductID1"></div></td>
+							</tr>
+							<tr>
+								<td align="right"><span id="Span_Quantity1">数量:</span></td>
+								<td><div data-dojo-type="dijit/form/TextBox" id="Quantity1"
+										data-dojo-id="Quantity1"></div></td>
+							</tr>
+							<tr>
+								<td colspan="2">&nbsp;</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<button id="submitButton" type="button"
+							data-dojo-id="submitButton" data-dojo-type="dijit/form/Button"
+							onClick="submitCtrip">提交</button>
+						<div style="display: none" id="ProductCount">1</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+</body>
+</html>
