@@ -12,7 +12,7 @@ public class Refund extends CtripEntity {
 	private long timestamp;
 	private int operateType;
 	@OneToOne
-	private Order order;
+	private OrderInfo order;
 	private String remark;
 	@OneToMany
 	private List<Product> productList;
@@ -41,11 +41,11 @@ public class Refund extends CtripEntity {
 		this.operateType = operateType;
 	}
 
-	public Order getOrder() {
+	public OrderInfo getOrder() {
 		return order;
 	}
 
-	public void setOrder(Order order) {
+	public void setOrder(OrderInfo order) {
 		this.order = order;
 	}
 

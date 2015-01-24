@@ -7,7 +7,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
 @Entity
-public class Order extends CtripEntity {
+public class OrderInfo extends CtripEntity {
 	private long orderId;
 	private long timestamp;
 	private long bookingDate;

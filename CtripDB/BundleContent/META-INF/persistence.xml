@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-	<persistence-unit name="CtripDB">
-		<jta-data-source>java:comp/env/jdbc/CtripDB</jta-data-source>
-		<class>cn.lynx.ctripmall.db.model.Order</class>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="cn.lynx.ctripmall.persistunit" transaction-type="JTA">
+		<jta-data-source>jdbc/ctripdb</jta-data-source>
+		<class>cn.lynx.ctripmall.db.model.OrderInfo</class>
 		<class>cn.lynx.ctripmall.db.model.Product</class>
 		<class>cn.lynx.ctripmall.db.model.Receiver</class>
 		<class>cn.lynx.ctripmall.db.model.Refund</class>
 		<properties>
-			<property name="javax.persistence.schema-generation.create-database-schemas" value="true"/>
+			<property name="openjpa.jdbc.Schema" value="APP" /> 
+	        <property name="openjpa.Multithreaded" value="true" />
+		    <property name="openjpa.jdbc.DBDictionary" value="derby"/>
+	     	<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
 		</properties>
 	</persistence-unit>
 </persistence>
