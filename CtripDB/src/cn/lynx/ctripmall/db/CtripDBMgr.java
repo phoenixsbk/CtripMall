@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.annotation.Resource;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnit;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -33,7 +31,9 @@ public class CtripDBMgr {
 
 	private CtripDBMgr() {
 		try {
-            emf = (EntityManagerFactory) new InitialContext().lookup(PERSISTENCE_UNIT_JNDI);
+			InitialContext ctx = new InitialContext();
+            emf = (EntityManagerFactory) ctx.lookup(PERSISTENCE_UNIT_JNDI);
+            utx = (UserTransaction) ctx.lookup("osgi:service/javax.transaction.UserTransaction");
       } catch (NamingException e) {
             e.printStackTrace();
       }
@@ -41,14 +41,6 @@ public class CtripDBMgr {
 	
 	public static CtripDBMgr getInstance() {
 		return instance;
-	}
-	
-	public void bindUTService(UserTransaction utx) {
-		this.utx = utx;
-	}
-	
-	public void unbindUTService(UserTransaction utx) {
-		this.utx = null;
 	}
 	
 	public <T extends CtripEntity> T saveEntity(T t) {
