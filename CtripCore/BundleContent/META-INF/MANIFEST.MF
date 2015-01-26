@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: CtripCore
+Bundle-SymbolicName: CtripCore
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: cn.lynx.ctripmall.model,
+ com.ibm.json.java;version="1.0.0",
+ com.ibm.websphere.jaxrs.server;version="1.1.0",
+ javax.ws.rs;version="1.0.0",
+ javax.ws.rs.core;version="1.0.0",
+ javax.ws.rs.ext;version="1.0.0"
+Export-Package: cn.lynx.ctripmall.rest,
+ cn.lynx.ctripmall.rest.model
+Web-ContextPath: /CtripCore
+Bundle-ClassPath: .
+
