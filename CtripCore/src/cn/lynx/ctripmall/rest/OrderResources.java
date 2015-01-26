@@ -12,6 +12,7 @@ public class OrderResources {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public ResultMsg postOrder(@FormParam("data") String data, @FormParam("sign") String sign) {
+		System.out.println("Visited orderinfo");
 		return new ResultMsg();
 	}
 }
