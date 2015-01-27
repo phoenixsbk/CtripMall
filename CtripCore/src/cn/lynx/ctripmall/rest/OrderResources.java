@@ -1,6 +1,5 @@
 package cn.lynx.ctripmall.rest;
 
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -11,6 +10,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import cn.lynx.ctripmall.db.CtripDBMgr;
+import cn.lynx.ctripmall.db.model.OrderInfo;
+import cn.lynx.ctripmall.rest.model.RestOrderInfo;
 import com.ibm.json.java.JSON;
 import com.ibm.json.java.JSONObject;
 
@@ -32,14 +34,28 @@ public class OrderResources {
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public ResultMsg postOrder(@FormParam("data") String data, @FormParam("sign") String sign) {
-		if (LOGGER.isLoggable(Level.FINEST)) {
-			LOGGER.logp(Level.FINEST, CLASSNAME, "postOrder", "Receive the post message with data:[" + data + "] and sign:[" + sign + "]");
+		final String METHOD = "postOrder";
+		if (LOGGER.isLoggable(Level.FINER)) {
+			LOGGER.entering(CLASSNAME, METHOD, "[TRACE ORDER] Receive the post message with data:[" + data + "] and sign:[" + sign + "]");
 		}
+		
+		ResultMsg msg = new ResultMsg();
+		
 		try {
 			JSONObject jo = (JSONObject)JSON.parse(data);
+			OrderInfo oi = RestOrderInfo.fromJSON(jo);
+			CtripDBMgr.getInstance().saveEntity(oi);
+			msg.setResult(0);
+			msg.setResultmessage("Correctly update the order info");
 		} catch (Exception e) {
-			LOGGER.logp(Level.SEVERE, CLASSNAME, "postOrder", "[Exception] When parsing the json object from ctrip data:[" + data + "]", e);
+			LOGGER.logp(Level.SEVERE, CLASSNAME, METHOD, "[EXCEPTION ORDER] When parsing the json object from ctrip data:[" + data + "]", e);
+			msg.setResult(1);
+			msg.setResultmessage("Exception when parse the order info.");
 		}
-		return new ResultMsg();
+		
+		if (LOGGER.isLoggable(Level.FINER)) {
+			LOGGER.exiting(CLASSNAME, METHOD, "[TRACE ORDER] Complete with result status:" + msg);
+		}
+		return msg;
 	}
 }

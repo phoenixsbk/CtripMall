@@ -2,47 +2,45 @@ package cn.lynx.ctripmall.rest.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.ibm.json.java.JSONArray;
 import com.ibm.json.java.JSONObject;
 
-import cn.lynx.ctripmall.model.OrderInfo;
+import cn.lynx.ctripmall.db.model.OrderInfo;
+import cn.lynx.ctripmall.db.model.Product;
+import cn.lynx.ctripmall.db.model.Receiver;
+import static cn.lynx.ctripmall.rest.util.RestUtil.*;
 
-public class RestOrderInfo extends OrderInfo implements RestObj {
-	
-	private String uuid;
+public class RestOrderInfo {
 
-	@Override
-	public String getUuid() {
-		return this.uuid;
-	}
-
-	@Override
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
-
-	@Override
-	public void fromJSON(JSONObject jo) {
-		this.orderId = (Long) jo.get("orderid");
-		this.timestamp = (Long) jo.get("timestamp");
-		this.bookingDate = (Long) jo.get("bookingdate");
-		this.invoicePrice = (Double) jo.get("invoiceprice");
-		this.invoiceContent = (String) jo.get("invoicecontent");
-		this.invoiceHead = (String) jo.get("invoicehead");
+	public static OrderInfo fromJSON(JSONObject jo) {
+		OrderInfo doi = new OrderInfo();
 		
-		JSONArray productAry = (JSONArray) jo.get("productlist");
-		List<RestProduct> productList = new ArrayList<RestProduct>();
+		doi.setOrderId(getLong(jo, "orderid"));
+		doi.setTimestamp(getLong(jo, "timestamp"));
+		doi.setBookingDate(getLong(jo, "bookingdate"));
+		doi.setInvoicePrice(getDouble(jo, "invoiceprice"));
+		doi.setInvoiceContent(getOptionalString(jo, "invoicecontent", ""));
+		doi.setInvoiceHead(getOptionalString(jo, "invoicehead", ""));
+		
+		JSONArray productAry = getArray(jo, "productlist");
+		List<Product> productList = new ArrayList<Product>();
 		for (Object po : productAry) {
 			JSONObject productjo = (JSONObject) po;
-			RestProduct rp = new RestProduct();
-			rp.fromJSON(productjo);
+			Product rp = RestProduct.fromJSON(productjo);
+			String uuid = UUID.randomUUID().toString();
+			rp.setUuid(uuid);
 			productList.add(rp);
 		}
+		doi.setProductList(productList);
 		
-		JSONObject ro = (JSONObject) jo.get("receiverinfo");
-		RestReceiver rr = new RestReceiver();
-		rr.fromJSON(ro);
-		this.receiver = rr;
+		JSONObject ro = getObject(jo, "receiverinfo");
+		Receiver rr = RestReceiver.fromJSON(ro);
+		String uuid = UUID.randomUUID().toString();
+		rr.setUuid(uuid);
+		doi.setReceiver(rr);
+		
+		return doi;
 	}
 }

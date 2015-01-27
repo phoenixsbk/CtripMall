@@ -4,7 +4,8 @@ Bundle-Name: CtripCore
 Bundle-SymbolicName: CtripCore
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: cn.lynx.ctripmall.model,
+Import-Package: cn.lynx.ctripmall.db,
+ cn.lynx.ctripmall.db.model,
  com.ibm.json.java;version="1.0.0",
  com.ibm.websphere.jaxrs.server;version="1.1.0",
  javax.ws.rs;version="1.0.0",
@@ -13,5 +14,3 @@ Import-Package: cn.lynx.ctripmall.model,
 Export-Package: cn.lynx.ctripmall.rest,
  cn.lynx.ctripmall.rest.model
 Web-ContextPath: /CtripCore
-Bundle-ClassPath: .
-

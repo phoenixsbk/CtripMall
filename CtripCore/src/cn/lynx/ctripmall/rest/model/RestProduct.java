@@ -1,33 +1,42 @@
 package cn.lynx.ctripmall.rest.model;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.ibm.json.java.JSONObject;
 
-import cn.lynx.ctripmall.model.Product;
+import cn.lynx.ctripmall.db.CtripDBMgr;
+import cn.lynx.ctripmall.db.model.Product;
+import static cn.lynx.ctripmall.rest.util.RestUtil.*;
 
-public class RestProduct extends Product implements RestObj {
-	
-	private String uuid;
+public class RestProduct {
 
-	@Override
-	public String getUuid() {
-		return this.uuid;
-	}
-
-	@Override
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
-	}
-	
-	@Override
-	public void fromJSON(JSONObject jo) {
-		this.exProductId = (String) jo.get("exproductid");
-		this.exSubProductId = (String) jo.get("exsubproductid");
-		this.productName = (String) jo.get("productname");
-		this.quantity = (Long) jo.get("quantity");
-		this.price = (Double) jo.get("price");
-		this.experience = (Integer) jo.get("experience");
-		this.settlePrice = (Double) jo.get("settleprice");
-		this.color = (String) jo.get("color");
-		this.size = (String) jo.get("size");
+	public static Product fromJSON(JSONObject jo) {
+		if (jo.containsKey("productname")) {
+			Product p = new Product();
+			
+			p.setExProductId(getString(jo, "exproductid"));
+			p.setExSubProductId(getString(jo, "exsubproductid"));
+			p.setProductName(getString(jo, "productname"));
+			p.setQuantity(getLong(jo, "quantity"));
+			p.setPrice(getDouble(jo, "price"));
+			p.setExperience(getInt(jo, "experience"));
+			p.setSettlePrice(getDouble(jo, "settleprice"));
+			p.setColor(getString(jo, "color"));
+			p.setSize(getString(jo, "size"));
+			
+			return p;
+		} else {
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("exProductId", getString(jo, "exproductid"));
+			param.put("exSubProductId", getString(jo, "exsubproductid"));
+			List<Product> result = CtripDBMgr.getInstance().queryEntitiesByProperties(Product.class, param, 1);
+			if (result == null || result.size() < 1) {
+				throw new IllegalArgumentException("Can't find the corresponding Product entity from database.");
+			}
+			
+			return result.get(0);
+		}
 	}
 }

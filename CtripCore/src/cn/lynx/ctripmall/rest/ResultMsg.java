@@ -19,4 +19,9 @@ public class ResultMsg {
 	public void setResultmessage(String resultmessage) {
 		this.resultmessage = resultmessage;
 	}
+	
+	@Override
+	public String toString() {
+		return "Status code [" + result + "] | message [" + resultmessage + "]";
+	}
 }
