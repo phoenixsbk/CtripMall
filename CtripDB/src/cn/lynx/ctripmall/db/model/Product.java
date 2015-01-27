@@ -1,16 +1,19 @@
-package cn.lynx.ctripmall.model;
+package cn.lynx.ctripmall.db.model;
 
-public abstract class Product {
+import javax.persistence.Entity;
+
+@Entity
+public class Product extends CtripEntity implements Cloneable {
 	
-	protected String exProductId;
-	protected String exSubProductId;
-	protected String productName;
-	protected long quantity;
-	protected double price;
-	protected int experience;
-	protected double settlePrice;
-	protected String color;
-	protected String size;
+	private String exProductId;
+	private String exSubProductId;
+	private String productName;
+	private long quantity;
+	private double price;
+	private int experience;
+	private double settlePrice;
+	private String color;
+	private String size;
 	
 	public String getExProductId() {
 		return exProductId;
@@ -52,20 +55,20 @@ public abstract class Product {
 		this.price = price;
 	}
 
-	public int getExp() {
+	public int getExperience() {
 		return experience;
 	}
 
-	public void setExp(int exp) {
-		this.experience = exp;
+	public void setExperience(int experience) {
+		this.experience = experience;
 	}
 
-	public double getSettingPrice() {
+	public double getSettlePrice() {
 		return settlePrice;
 	}
 
-	public void setSettingPrice(double settingPrice) {
-		this.settlePrice = settingPrice;
+	public void setSettlePrice(double settlePrice) {
+		this.settlePrice = settlePrice;
 	}
 
 	public String getColor() {
@@ -82,5 +85,20 @@ public abstract class Product {
 
 	public void setSize(String size) {
 		this.size = size;
+	}
+	
+	@Override
+	public Product clone() {
+		Product p = new Product();
+		p.exProductId = this.exProductId;
+		p.exSubProductId = this.exSubProductId;
+		p.productName = this.productName;
+		p.quantity = this.quantity;
+		p.price = this.price;
+		p.experience = this.experience;
+		p.settlePrice = this.settlePrice;
+		p.color = this.color;
+		p.size = this.size;
+		return p;
 	}
 }

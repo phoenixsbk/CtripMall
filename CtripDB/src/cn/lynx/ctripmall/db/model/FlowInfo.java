@@ -1,6 +1,9 @@
-package cn.lynx.ctripmall.model;
+package cn.lynx.ctripmall.db.model;
 
-public abstract class FlowInfo {
+import javax.persistence.Entity;
+
+@Entity
+public class FlowInfo extends CtripEntity {
 	protected String flowCompanyName;
 	protected String flowTicketNumber;
 	protected int flowStatus;

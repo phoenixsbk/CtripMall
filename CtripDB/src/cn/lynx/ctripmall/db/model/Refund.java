@@ -1,15 +1,24 @@
-package cn.lynx.ctripmall.model;
+package cn.lynx.ctripmall.db.model;
 
 import java.util.List;
 
-public abstract class Refund {
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+@Entity
+public class Refund extends CtripEntity {
 	
-	protected long refundApplyId;
-	protected long timestamp;
-	protected int operateType;
-	protected OrderInfo orderInfo;
-	protected String remark;
+	private long refundApplyId;
+	private long timestamp;
+	private int operateType;
+	@OneToOne
+	private OrderInfo orderInfo;
+	private String remark;
+	@OneToOne(cascade=CascadeType.ALL)
 	protected FlowInfo flowInfo;
+	@OneToMany
 	protected List<Product> productList;
 
 	public long getRefundApplyId() {

@@ -12,5 +12,6 @@ Import-Package: javax.naming,
  javax.sql;version="0.0.0",
  javax.transaction;version="1.1.0",
  org.osgi.framework
-Export-Package: cn.lynx.ctripmall.model
+Export-Package: cn.lynx.ctripmall.db,
+ cn.lynx.ctripmall.db.model
 

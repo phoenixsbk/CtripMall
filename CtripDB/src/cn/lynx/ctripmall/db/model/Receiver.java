@@ -1,6 +1,10 @@
-package cn.lynx.ctripmall.model;
+package cn.lynx.ctripmall.db.model;
 
-public abstract class Receiver {
+import javax.persistence.Entity;
+import javax.persistence.Lob;
+
+@Entity
+public class Receiver extends CtripEntity {
 
 	protected String contactName;
 	protected String mobilePhone;
@@ -8,7 +12,9 @@ public abstract class Receiver {
 	protected String provinceName;
 	protected String cityName;
 	protected String zoneName;
+	@Lob
 	protected String address;
+	@Lob
 	protected String remark;
 
 	public String getContactName() {
