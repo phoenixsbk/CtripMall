@@ -1,0 +1,16 @@
+data={
+ "refundapplyid":1,
+ "timestamp":1415789325750,
+ "operatetype":1,
+ "orderid":1000000001,
+ "remark":"",
+ "productlist":
+[
+ {
+	"exproductid":" A-0000001",
+	"exsubproductid":"A-01-0000001",
+	"quantity":4
+ }
+ ]
+}
+sign="b7d0998ca64c3ec5c376f1b5dc377c59"

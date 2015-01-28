@@ -1,0 +1,33 @@
+data={
+ "orderid":1000000001,
+ "timestamp":1415789325750,
+ "bookingdate":1415894400000,
+ "invoiceprice":100,
+ "invoicecontent":"LV包",
+ "invoicehead":"个人",
+ "productlist":
+[
+ {
+   "exproductid":" A-0000001",
+   "exsubproductid":"A-01-0000001",
+   "productname":"Lv包包",
+   "quantity":4,
+   "price":50,
+   "experience":10,
+   "settleprice":0.1,
+   "color":"Red",
+   "size":"L"
+ }
+],
+ "receiverinfo":{
+ "contactname":"小小",
+ "mobilephone":"13888889999",
+ "email":"xiaoxiao@12s.com",
+ "provincename":"上海",
+ "cityname":"上海市",
+ "zonename":"长宁区",
+ "address":"长宁路101号",
+ "remark":"备注"
+ }
+}
+sign="b7d0998ca64c3ec5c376f1b5dc377c59"

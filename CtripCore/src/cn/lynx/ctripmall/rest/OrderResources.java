@@ -13,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 import cn.lynx.ctripmall.db.CtripDBMgr;
 import cn.lynx.ctripmall.db.model.OrderInfo;
 import cn.lynx.ctripmall.rest.model.RestOrderInfo;
+import cn.lynx.ctripmall.rest.util.HMACMD5;
+
 import com.ibm.json.java.JSON;
 import com.ibm.json.java.JSONObject;
 
@@ -25,9 +27,10 @@ public class OrderResources {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public ResultMsg getOrder() {
+		String encode = HMACMD5.MD5("orderid=1234567", System.currentTimeMillis());
 		ResultMsg msg = new ResultMsg();
 		msg.setResult(0);
-		msg.setResultmessage("hello world");
+		msg.setResultmessage("hello world:" + encode);
 		return msg;
 	}
 	
