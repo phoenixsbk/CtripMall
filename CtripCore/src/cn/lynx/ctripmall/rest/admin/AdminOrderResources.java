@@ -9,13 +9,22 @@ import javax.ws.rs.core.MediaType;
 
 import cn.lynx.ctripmall.db.CtripDBMgr;
 import cn.lynx.ctripmall.db.model.OrderInfo;
+import cn.lynx.ctripmall.db.model.Product;
 
 @Path("/admin/orderinfo")
 public class AdminOrderResources {
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON + ";charset=UTF-8")
 	public List<OrderInfo> listAllOrders() {
-		return CtripDBMgr.getInstance().queryEntitiesByProperties(OrderInfo.class, null, -1);
+		List<OrderInfo> result = CtripDBMgr.getInstance().queryEntitiesByProperties(OrderInfo.class, null, -1);
+		for (OrderInfo oi : result) {
+			List<Product> rr = oi.getProductList();
+			if (rr == null)  continue;
+			for (Product p : rr) {
+				System.out.println(p.getProductName());
+			}
+		}
+		return result;
 	}
 }

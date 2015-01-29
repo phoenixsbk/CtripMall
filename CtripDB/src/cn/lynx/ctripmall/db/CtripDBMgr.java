@@ -27,6 +27,7 @@ public class CtripDBMgr {
 	private static CtripDBMgr instance = new CtripDBMgr();
 	
 	private EntityManagerFactory emf = null;
+	private EntityManager em = null;
 	private UserTransaction utx;
 
 	private CtripDBMgr() {
@@ -34,6 +35,7 @@ public class CtripDBMgr {
 			InitialContext ctx = new InitialContext();
             emf = (EntityManagerFactory) ctx.lookup(PERSISTENCE_UNIT_JNDI);
             utx = (UserTransaction) ctx.lookup("osgi:service/javax.transaction.UserTransaction");
+            em = emf.createEntityManager();
       } catch (NamingException e) {
             e.printStackTrace();
       }
@@ -44,7 +46,6 @@ public class CtripDBMgr {
 	}
 	
 	public <T extends CtripEntity> T saveEntity(T t) {
-		EntityManager em = emf.createEntityManager();
 		try {
 			utx.begin();
 			em.joinTransaction();
@@ -64,14 +65,12 @@ public class CtripDBMgr {
 	}
 
 	public <T extends CtripEntity> T removeEntity(T t) {
-		EntityManager em = emf.createEntityManager();
 		em.remove(t);
 		return t;
 	}
-
+	
 	public <T extends CtripEntity> List<T> queryEntitiesByProperties(Class<T> clazz, Map<String, Object> propMap,
 			int topNum) {
-		EntityManager em = emf.createEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 		CriteriaQuery<T> cq = cb.createQuery(clazz);
 
@@ -98,7 +97,6 @@ public class CtripDBMgr {
 		}
 
 		List<T> result = tq.getResultList();
-		em.close();
 
 		return result;
 	}

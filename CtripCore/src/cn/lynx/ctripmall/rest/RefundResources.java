@@ -19,6 +19,7 @@ import cn.lynx.ctripmall.db.model.Product;
 import cn.lynx.ctripmall.db.model.Refund;
 import cn.lynx.ctripmall.rest.model.RestProduct;
 import cn.lynx.ctripmall.rest.model.RestRefund;
+import cn.lynx.ctripmall.rest.util.HMACMD5;
 
 import com.ibm.json.java.JSON;
 import com.ibm.json.java.JSONArray;
@@ -43,6 +44,14 @@ public class RefundResources {
 		try {
 			JSONObject jo = (JSONObject) JSON.parse(data);
 			Refund r = RestRefund.fromJSON(jo);
+			
+			String refundstr = "refundapplyid=" + r.getRefundApplyId();
+			String computeSign = HMACMD5.MD5(refundstr, r.getTimestamp());
+			if (computeSign == null || !computeSign.equals(sign)) {
+				msg.setResult(1);
+				msg.setResultmessage("Incorrect sign");
+				return msg;
+			}
 			
 			/* Search for order */
 			long orderId = (Long) jo.get("orderid");
