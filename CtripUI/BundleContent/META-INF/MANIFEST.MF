@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: CtripUI
-Bundle-SymbolicName: CtripUI
-Bundle-Version: 1.0.0.qualifier
-Bundle-Blueprint: OSGI-INF/blueprint/*.xml
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-
