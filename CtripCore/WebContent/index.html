@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>首页</title>
+<link rel="stylesheet" type="text/css" href="css/main.css">
+<link rel="stylesheet" href="js/dojo/resources/dojo.css" />
+<link rel="stylesheet" href="js/dijit/themes/dijit.css" />
+<link rel="stylesheet" href="js/dijit/themes/claro/claro.css" />
+<script type="text/javascript" src="js/hmac-md5.js"></script>
+<script type="text/javascript" src="js/dojo/dojo.js"
+	data-dojo-config="parseOnLoad: true, async: true, isDebug: true"></script>
+<script>
+	require([ "dojo/parser", "dijit/layout/BorderContainer", "dijit/form/DropDownButton", "dijit/Toolbar",
+			"dijit/layout/ContentPane", "dijit/form/TextBox",
+			"dijit/form/Button" ]);
+	var REST_ORDER_TYPE = "./rest/admin/orderinfo/type/";
+	require(["dojo/on", "dojo/ready", "dojo/request/xhr", "dojo/data/ItemFileReadStore"], function(on, ready, xhr, ItemFileReadStore) {
+		ready(function() {
+			on(RefreshOrderButton, "click", function() {
+				standbyForGrid.show();
+				
+				var ordertype = OrderTypeSelect.value;
+				xhr.get(REST_ORDER_TYPE + ordertype, {
+					handleAs: "json",
+					preventCache: true
+				}).then(
+					function (resp) {
+						standbyForGrid.hide();
+						var orderdata = {
+							identifier: "uuid",
+							items: resp
+						};
+						
+						var datastore = new ItemFileReadStore({data : orderdata});
+						OrderListGrid.setStore(datastore);
+						OrderListGrid.startup();
+					},
+					function (error) {
+						standbyForGrid.hide();
+						console.log(error);
+					});
+			})
+		})
+	});
+	/*
+	require(["dojo/request/xhr", "dojo/dom", "dojo/data/ItemFileReadStore", "dojo/on"], function(xhr, dom, ItemFileReadStore, on) {
+		
+				}).then(
+					function (resp) {
+						standByForRunJob.hide();
+						
+						var joblistdata = {
+							identifier: "uuid",
+							items: resp
+						};
+						var datastore = new ItemFileReadStore({data : joblistdata});
+						RunJobListGrid.setStore(datastore);
+						RunJobListGrid.startup();
+					},
+					function (error) {
+						standByForRunJob.hide();
+						console.log(error);
+					}
+				);
+			});
+		});
+	});
+	*/
+</script>
+</head>
+<body class="claro">
+	<div data-dojo-type="dijit/layout/BorderContainer" data-dojo-id="MainContainer" id="MainContainer" style="margin-left:auto;margin-right:auto;width:1200px;height:100%">
+		<div data-dojo-type="dijit/layout/ContentPane" class="defaultTitle" data-dojo-props="region: 'top'" style="height:91px;padding:0px">
+			<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+					<td align="left" style="vertical-align:middle;padding-left:20px;width:500px;height:65px;font-family: Verdana;font-weight: bold;font-size:18px">订单接收及物流配送系统</td>
+				</tr>
+				<tr>
+					<td align="left" height="26px"><div data-dojo-type="dijit/Toolbar">
+						<div data-dojo-type="dijit/form/DropDownButton">
+							<span>首页</span>
+							<div data-dojo-type="dijit/DropDownMenu">
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">首页</div>
+							</div>
+						</div>
+						<div data-dojo-type="dijit/form/DropDownButton">
+							<span>查看</span>
+							<div data-dojo-type="dijit/DropDownMenu">
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">查看/刷新订单信息</div>
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">查看/刷新退换货订单信息</div>
+							</div>
+						</div>
+						<div data-dojo-type="dijit/form/DropDownButton">
+							<span>帮助</span>
+							<div data-dojo-type="dijit/DropDownMenu">
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">帮助</div>
+							</div>
+						</div>
+					</div></td>
+			</table>
+		</div>
+		<div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region: 'center'" style="width:1200px;height:100%">
+			<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="title: '订单信息'" style="height:100%" data-dojo-id="OrderPane" id="OrderPane">
+				<div style="width:100%;height: 25px">
+					<div data-dojo-type="dijit/form/Select" data-dojo-id="OrderTypeSelect" id="OrderTypeSelect">
+						<span value="OrderNew">新订单</span>
+						<span value="OrderFlow">已配送/已更新订单</span>
+						<span value="OrderAll">全部订单</span>
+					</div>
+					<button type="button" data-dojo-type="dijit/form/Button" data-dojo-id="RefreshOrderButton" id="RefreshOrderButton">刷新/载入</button>
+				</div>
+				<div style="width:100%;height:100%">
+					<table data-dojo-type="dojox/grid/DataGrid" data-dojo-id="OrderListGrid" id="OrderListGrid" data-dojo-props="selectable: false" style="width:100%;height:90%">
+						<thead>
+							<tr>
+								<th field="orderId" align="center" width="150px"><span style="text-align: center;font-weight: bold">订单编号</span></th>
+								<th field="timestamp" align="center" width="75px" formatter="dateFormatter"><span style="text-align: center;font-weight: bold">当前时间</span></th>
+								<th field="bookingDate" align="center" width="75px" formatter="dateFormatter"><span style="text-align:center;font-weight:bold">下单时间</span></th>
+								<th field="invoicePrice" align="center" width="80px"><span style="text-align: center;font-weight: bold">发票金额</span></th>
+								<th field="invoiceContent" align="center" width="200px"><span style="text-align: center;font-weight: bold">发票内容</span></th>
+								<th field="invoiceHead" align="center" width="200px"><span style="text-align: center;font-weight: bold">发票抬头</span></th>
+								<th field="productList.name" align="center" width="100px"><span style="text-align: center;font-weight: bold">商品名称</span></th>
+								<th field="productList.quantity" align="center" width="50px"><span style="text-align: center;font-weight: bold">商品数量</span></th>
+							</tr>
+						</thead>
+					</table>
+					<div data-dojo-id="standbyForGrid" data-dojo-type="dojox/widget/Standby" image="images/loading.gif" data-dojo-props="target: 'OrderListGrid'"></div>
+				</div>
+			</div>
+			<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="title: '退换货信息'" style="height:100%" data-dojo-id="RefundPane" id="RefundPane">
+				bbc
+			</div>
+		</div>
+	</div>
+</body>
+</html>

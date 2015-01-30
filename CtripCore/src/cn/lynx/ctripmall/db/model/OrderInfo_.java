@@ -5,7 +5,7 @@ import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="Dali", date="2015-01-29T01:22:03.780+0800")
+@Generated(value="Dali", date="2015-01-31T03:19:56.525+0800")
 @StaticMetamodel(OrderInfo.class)
 public class OrderInfo_ extends CtripEntity_ {
 	public static volatile SingularAttribute<OrderInfo, Long> orderId;

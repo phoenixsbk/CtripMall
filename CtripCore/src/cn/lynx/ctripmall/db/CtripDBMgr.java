@@ -69,6 +69,10 @@ public class CtripDBMgr {
 		return t;
 	}
 	
+	public <T extends CtripEntity> T queryEntity(Class<T> clazz, String uuid) {
+		return em.find(clazz, uuid);
+	}
+	
 	public <T extends CtripEntity> List<T> queryEntitiesByProperties(Class<T> clazz, Map<String, Object> propMap,
 			int topNum) {
 		CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -85,7 +89,13 @@ public class CtripDBMgr {
 				Object val = propMap.get(key);
 
 				Expression<T> exp = buildExpressionEqual(rootEntity, key);
-				criteria = cb.and(criteria, cb.equal(exp, val));
+				if (val == null) {
+					criteria = cb.and(criteria, cb.isNull(exp));
+				} else if (val.equals("$NONENULL$")) {
+					criteria = cb.and(criteria, cb.isNotNull(exp));
+				} else {
+					criteria = cb.and(criteria, cb.equal(exp, val));
+				}
 			}
 
 			cq.where(criteria);

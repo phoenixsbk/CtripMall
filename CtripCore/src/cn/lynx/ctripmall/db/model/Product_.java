@@ -4,7 +4,7 @@ import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="Dali", date="2015-01-29T01:22:03.781+0800")
+@Generated(value="Dali", date="2015-01-31T03:19:56.529+0800")
 @StaticMetamodel(Product.class)
 public class Product_ extends CtripEntity_ {
 	public static volatile SingularAttribute<Product, String> exProductId;
