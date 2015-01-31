@@ -50,14 +50,14 @@ public class OrderResources {
 			OrderInfo oi = RestOrderInfo.fromJSON(jo);
 			String orderstr = "orderid=" + oi.getOrderId();
 			String computeSign = HMACMD5.MD5(orderstr, oi.getTimestamp());
-			if (computeSign == null || !computeSign.equals(sign)) {
-				msg.setResult(1);
-				msg.setResultmessage("Incorrect sign data, please verify");
-			} else {
+			//if (computeSign == null || !computeSign.equals(sign)) {
+			//	msg.setResult(1);
+			//	msg.setResultmessage("Incorrect sign data, please verify");
+			//} else {
 				CtripDBMgr.getInstance().saveEntity(oi);
 				msg.setResult(0);
 				msg.setResultmessage("Correctly update the order info");
-			}
+			//}
 		} catch (Exception e) {
 			LOGGER.logp(Level.SEVERE, CLASSNAME, METHOD,
 					"[EXCEPTION ORDER] When parsing the json object from ctrip data:[" + data + "]", e);

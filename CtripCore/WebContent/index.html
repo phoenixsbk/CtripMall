@@ -3,19 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <title>首页</title>
-<link rel="stylesheet" type="text/css" href="css/main.css">
+<link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="js/dojo/resources/dojo.css" />
 <link rel="stylesheet" href="js/dijit/themes/dijit.css" />
 <link rel="stylesheet" href="js/dijit/themes/claro/claro.css" />
+<link rel="stylesheet" href="js/dojox/grid/resources/claroGrid.css"
 <script type="text/javascript" src="js/hmac-md5.js"></script>
 <script type="text/javascript" src="js/dojo/dojo.js"
 	data-dojo-config="parseOnLoad: true, async: true, isDebug: true"></script>
 <script>
 	require([ "dojo/parser", "dijit/layout/BorderContainer", "dijit/form/DropDownButton", "dijit/Toolbar",
 			"dijit/layout/ContentPane", "dijit/form/TextBox",
-			"dijit/form/Button" ]);
-	var REST_ORDER_TYPE = "./rest/admin/orderinfo/type/";
-	require(["dojo/on", "dojo/ready", "dojo/request/xhr", "dojo/data/ItemFileReadStore"], function(on, ready, xhr, ItemFileReadStore) {
+			"dijit/form/Button", "dojo/date/locale"]);
+	var REST_ORDER_TYPE = "rest/admin/orderinfo/type/";
+	require(["dojo/on", "dojo/ready", "dojo/request/xhr", "dojo/store/Memory",
+	         "dojo/data/ObjectStore"], function(on, ready, xhr, Memory, ObjectStore) {
 		ready(function() {
 			on(RefreshOrderButton, "click", function() {
 				standbyForGrid.show();
@@ -27,22 +29,66 @@
 				}).then(
 					function (resp) {
 						standbyForGrid.hide();
-						var orderdata = {
-							identifier: "uuid",
-							items: resp
-						};
-						
-						var datastore = new ItemFileReadStore({data : orderdata});
-						OrderListGrid.setStore(datastore);
+						var datastore = new Memory({data : resp});
+						var store = new ObjectStore({objectStore: datastore});
+						OrderListGrid.setStore(store);
 						OrderListGrid.startup();
 					},
 					function (error) {
 						standbyForGrid.hide();
 						console.log(error);
 					});
-			})
+			});
+			
+			on(OrderListGrid, "rowclick", function(e) {
+				var selItem = OrderListGrid.getItem(e.rowIndex);
+				console.log(selItem.productList);
+				var datastore = new Memory({data : selItem.productList});
+				var store = new ObjectStore({objectStore: datastore});
+				OrderProductTable.setStore(store);
+				OrderProductTable.startup();
+				
+				fillUpdateOrderDlg(selItem);
+				
+				UpdateOrderInfoDlg.show();
+			});
 		})
 	});
+	
+	var fillUpdateOrderDlg = function(orderItem) {
+		TxtOrderID.set("value", orderItem.orderId);
+		TxtTimeStamp.set("value", orderItem.timestamp);
+		TxtBookingDate.set("value", orderItem.bookingDate);
+		TxtInvoiceHead.set("value", orderItem.invoiceHead);
+		TxtInvoiceContent.set("value", orderItem.invoiceContent);
+		TxtInvoicePrice.set("value", orderItem.invoicePrice);
+		TxtContactName.set("value", orderItem.receiver.contactName);
+		TxtMobilePhone.set("value", orderItem.receiver.mobilePhone);
+		TxtEmail.set("value", orderItem.receiver.email);
+		TxtProvinceName.set("value", orderItem.receiver.provinceName);
+		TxtCityName.set("value", orderItem.receiver.cityName);
+		TxtZoneName.set("value", orderItem.receiver.zoneName);
+		TxtAddress.set("value", orderItem.receiver.address);
+		TxtRemark.set("value", orderItem.receiver.remark);
+	}
+	
+	var dateFormatter = function(item) {
+		var d = new Date();
+		d.setTime(item);
+		return dojo.date.locale.format(d);
+	};
+	
+	var productFormatter = function(item) {
+		var productNames = "";
+		for (var i in item) {
+			if (i != 0) {
+				productNames += ",";
+			}
+			productNames += item[i].productName;
+		}
+		return productNames;
+	}
+	
 	/*
 	require(["dojo/request/xhr", "dojo/dom", "dojo/data/ItemFileReadStore", "dojo/on"], function(xhr, dom, ItemFileReadStore, on) {
 		
@@ -114,14 +160,13 @@
 					<table data-dojo-type="dojox/grid/DataGrid" data-dojo-id="OrderListGrid" id="OrderListGrid" data-dojo-props="selectable: false" style="width:100%;height:90%">
 						<thead>
 							<tr>
-								<th field="orderId" align="center" width="150px"><span style="text-align: center;font-weight: bold">订单编号</span></th>
-								<th field="timestamp" align="center" width="75px" formatter="dateFormatter"><span style="text-align: center;font-weight: bold">当前时间</span></th>
-								<th field="bookingDate" align="center" width="75px" formatter="dateFormatter"><span style="text-align:center;font-weight:bold">下单时间</span></th>
+								<th field="orderId" align="center" width="100px"><span style="text-align: center;font-weight: bold">订单编号</span></th>
+								<th field="timestamp" align="center" width="140px" formatter="dateFormatter"><span style="text-align: center;font-weight: bold">当前时间</span></th>
+								<th field="bookingDate" align="center" width="140px" formatter="dateFormatter"><span style="text-align:center;font-weight:bold">下单时间</span></th>
 								<th field="invoicePrice" align="center" width="80px"><span style="text-align: center;font-weight: bold">发票金额</span></th>
 								<th field="invoiceContent" align="center" width="200px"><span style="text-align: center;font-weight: bold">发票内容</span></th>
-								<th field="invoiceHead" align="center" width="200px"><span style="text-align: center;font-weight: bold">发票抬头</span></th>
-								<th field="productList.name" align="center" width="100px"><span style="text-align: center;font-weight: bold">商品名称</span></th>
-								<th field="productList.quantity" align="center" width="50px"><span style="text-align: center;font-weight: bold">商品数量</span></th>
+								<th field="invoiceHead" align="center" width="100px"><span style="text-align: center;font-weight: bold">发票抬头</span></th>
+								<th field="productList" align="center" width="310px" formatter="productFormatter"><span style="text-align: center;font-weight: bold">商品列表</span></th>
 							</tr>
 						</thead>
 					</table>
@@ -133,5 +178,83 @@
 			</div>
 		</div>
 	</div>
+	
+	<!-- Popup dialog window for update the orderinfo -->
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="UpdateOrderInfoDlg" id="UpdateOrderInfoDlg" style="width: 900px;height:600px" data-dojo-props="title:'更新/查看订单信息'">
+		<table cellpadding="5" cellspacing="5" border="0" style="width:100%;height:100%">
+			<tr>
+				<td>订单编号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtOrderID" data-dojo-id="TxtOrderID" data-dojo-props="readOnly: true"></div></td>
+				<td>当前时间:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtTimeStamp" data-dojo-id="TxtTimeStamp" data-dojo-props="readOnly: true"></div></td>
+				<td>预订时间:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtBookingDate" data-dojo-id="TxtBookingDate" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td>发票抬头:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtInvoiceHead" data-dojo-id="TxtInvoiceHead" data-dojo-props="readOnly: true"></div></td>
+				<td>发票内容:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtInvoiceContent" data-dojo-id="TxtInvoiceContent" data-dojo-props="readOnly: true"></div></td>
+				<td>发票金额:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtInvoicePrice" data-dojo-id="TxtInvoicePrice" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3" style="width:900px;height:180px">
+					订单商品:&nbsp;
+					<table data-dojo-type="dojox/grid/DataGrid" style="width:100%;height:80%" data-dojo-props="selectable: false" id="OrderProductTable" data-dojo-id="OrderProductTable">
+						<thead>
+							<tr>
+								<th field="exProductId" width="120px">商品编号</th>
+								<th field="exSubProductId" width="120px">子商品编号</th>
+								<th field="productName" width="200px">商品名称</th>
+								<th field="quantity" width="50px">数量</th>
+								<th field="price" width="50px">价格</th>
+								<th field="experience" width="50px">积分</th>
+								<th field="settlePrice" width="50px">结算比例</th>
+								<th field="color" width="50px">颜色</th>
+								<th field="size" width="50px">尺寸</th>
+							</tr>
+						</thead>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>联系人:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtContactName" data-dojo-id="TxtContactName" data-dojo-props="readOnly: true"></div></td>
+				<td>联系人手机:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtMobilePhone" data-dojo-id="TxtMobilePhone" data-dojo-props="readOnly: true"></div></td>
+				<td>联系人邮箱:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtEmail" data-dojo-id="TxtEmail" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td>省:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtProvinceName" data-dojo-id="TxtProvinceName" data-dojo-props="readOnly: true"></div></td>
+				<td>市:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtCityName" data-dojo-id="TxtCityName" data-dojo-props="readOnly: true"></div></td>
+				<td>区:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtZoneName" data-dojo-id="TxtZoneName" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">地址:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtAddress" data-dojo-id="TxtAddress" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3" valign="top">配送备注:&nbsp;<div data-dojo-type="dijit/form/TextBox" style="width:500px;height:40px" id="TxtRemark" data-dojo-id="TxtRemark" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">物流公司名称:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="FlowCompanyName" data-dojo-id="FlowCompanyName"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">物流订单编号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="FlowTicketNumber" data-dojo-id="FlowTicketNumber"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">物流配送状态:&nbsp;<select name="FlowStatus" id="FlowStatus"
+					data-dojo-id="FlowStatus" data-dojo-type="dijit/form/Select">
+						<option value="0">配送中</option>
+						<option value="1">配送成功</option>
+						<option value="2">配送失败</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td colspan="3" valign="top">物流备注:&nbsp;<div data-dojo-type="dijit/form/TextBox" style="width:500px;height:40px" id="FlowRemark" data-dojo-id="FlowRemark"></div></td>
+			</tr>
+			<tr>
+				<td align="left">
+					<button id="updateButton" type="button" data-dojo-id="updateButton" data-dojo-type="dijit/form/Button">更新订单物流信息</button>
+				</td>
+				<td colspan="2" align="right">
+					<button id="closeButton" type="button" data-dojo-id="closeButton" onclick="UpdateOrderInfoDlg.hide();" data-dojo-type="dijit/form/Button">关闭窗口</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div data-dojo-id="standByForReg" data-dojo-type="dojox/widget/Standby" image="images/loading.gif" data-dojo-props="target: 'RegVMPane'"></div>
 </body>
 </html>
