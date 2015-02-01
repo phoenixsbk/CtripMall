@@ -31,7 +31,6 @@ Bundle-ClassPath: WEB-INF/classes,
  .,
  WEB-INF/lib/commons-codec-1.10.jar,
  WEB-INF/lib/wink-client-1.4.jar,
- WEB-INF/lib/wink-common-1.4.jar,
  WEB-INF/lib/jackson-all-1.9.11.jar,
  WEB-INF/lib/wink-jackson-provider-1.4.jar
 

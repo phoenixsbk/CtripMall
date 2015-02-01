@@ -18,7 +18,7 @@ import javax.naming.NamingException;
 import org.apache.commons.codec.binary.Base64;
 
 public class HMACMD5 {
-	private static final String FILEPATHKEY = "keyFile";
+	private static final String JNDI_KEYFILE = "keyFile";
 	private static final String KEY_KEY = "securityKey";
 	private static final String APPID_KEY = "appid";
 	private static final String DEFAULTKEY = "1C2CFE834E4B489E88CEACE93A7F6371";
@@ -50,7 +50,7 @@ public class HMACMD5 {
 		if (secKey == null || appid == null) {
 			synchronized (HMACMD5.class) {
 				try {
-					String confPath = new InitialContext().lookup(FILEPATHKEY).toString();
+					String confPath = new InitialContext().lookup(JNDI_KEYFILE).toString();
 					Properties p = new Properties();
 					p.load(new FileInputStream(new File(confPath)));
 					secKey = p.getProperty(KEY_KEY);

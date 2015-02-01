@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>首页</title>
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="js/dojo/resources/dojo.css" />
@@ -17,7 +17,7 @@
 			"dijit/form/Button", "dojo/date/locale"]);
 	var REST_ORDER_TYPE = "rest/admin/orderinfo/type/";
 	require(["dojo/on", "dojo/ready", "dojo/request/xhr", "dojo/store/Memory",
-	         "dojo/data/ObjectStore"], function(on, ready, xhr, Memory, ObjectStore) {
+	         "dojo/data/ObjectStore", "dojo/dom"], function(on, ready, xhr, Memory, ObjectStore, dom) {
 		ready(function() {
 			on(RefreshOrderButton, "click", function() {
 				standbyForGrid.show();
@@ -52,10 +52,61 @@
 				
 				UpdateOrderInfoDlg.show();
 			});
+			
+			on(updateButton, "click", function() {
+				if (FlowCompanyName.value == "" || FlowTicketNumber.value == "") {
+					dom.byId("usermsgtxt").innerHTML = "未输入物流公司名称或物流运单号";
+					UserMsgDlg.show();
+					return;
+				}
+				
+				xhr.post("rest/ctrip/orderinfo/" + TxtUuid.value, {
+					handleAs: "json",
+					preventCache: true,
+					headers: { "Content-Type" : "application/x-www-form-urlencoded; charset=utf-8" },
+					data: {
+						flowcompanyname: FlowCompanyName.value,
+						flowticketnumber: FlowTicketNumber.value,
+						flowstatus: Number(FlowStatus.value),
+						flowremark: FlowRemark.value
+					}
+				}).then(
+					function(resp) {
+						dom.byId("usermsgtxt").innerHTML = resp.resultmessage;
+						UserMsgDlg.show();
+					},
+					function(error) {
+						dom.byId("usermsgtxt").innerHTML = error;
+						UserMsgDlg.show();
+					}
+				);
+			});
 		})
 	});
 	
 	var fillUpdateOrderDlg = function(orderItem) {
+		TxtUuid.set("value", "");
+		TxtOrderID.set("value", "");
+		TxtTimeStamp.set("value", "");
+		TxtBookingDate.set("value", "");
+		TxtInvoiceHead.set("value", "");
+		TxtInvoiceContent.set("value", "");
+		TxtInvoicePrice.set("value", "");
+		TxtContactName.set("value", "");
+		TxtMobilePhone.set("value", "");
+		TxtEmail.set("value", "");
+		TxtProvinceName.set("value", "");
+		TxtCityName.set("value", "");
+		TxtZoneName.set("value", "");
+		TxtAddress.set("value", "");
+		TxtRemark.set("value", "");
+		
+		FlowCompanyName.set("value", "");
+		FlowTicketNumber.set("value", "");
+		FlowStatus.set("value", 0);
+		FlowRemark.set("value", "");
+		
+		TxtUuid.set("value", orderItem.uuid);
 		TxtOrderID.set("value", orderItem.orderId);
 		TxtTimeStamp.set("value", orderItem.timestamp);
 		TxtBookingDate.set("value", orderItem.bookingDate);
@@ -70,6 +121,13 @@
 		TxtZoneName.set("value", orderItem.receiver.zoneName);
 		TxtAddress.set("value", orderItem.receiver.address);
 		TxtRemark.set("value", orderItem.receiver.remark);
+		
+		if (orderItem.flowInfo != null) {
+			FlowCompanyName.set("value", orderItem.flowInfo.flowCompanyName);
+			FlowTicketNumber.set("value", orderItem.flowInfo.flowTicketNumber);
+			FlowStatus.set("value", orderItem.flowInfo.flowStatus);
+			FlowRemark.set("value", orderItem.flowInfo.flowRemark);
+		}
 	}
 	
 	var dateFormatter = function(item) {
@@ -156,8 +214,8 @@
 					</div>
 					<button type="button" data-dojo-type="dijit/form/Button" data-dojo-id="RefreshOrderButton" id="RefreshOrderButton">刷新/载入</button>
 				</div>
-				<div style="width:100%;height:100%">
-					<table data-dojo-type="dojox/grid/DataGrid" data-dojo-id="OrderListGrid" id="OrderListGrid" data-dojo-props="selectable: false" style="width:100%;height:90%">
+				<div style="width:100%;height:565px">
+					<table data-dojo-type="dojox/grid/DataGrid" data-dojo-id="OrderListGrid" id="OrderListGrid" data-dojo-props="selectable: false" style="width:100%;height:565px">
 						<thead>
 							<tr>
 								<th field="orderId" align="center" width="100px"><span style="text-align: center;font-weight: bold">订单编号</span></th>
@@ -180,7 +238,7 @@
 	</div>
 	
 	<!-- Popup dialog window for update the orderinfo -->
-	<div data-dojo-type="dijit/Dialog" data-dojo-id="UpdateOrderInfoDlg" id="UpdateOrderInfoDlg" style="width: 900px;height:600px" data-dojo-props="title:'更新/查看订单信息'">
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="UpdateOrderInfoDlg" id="UpdateOrderInfoDlg" style="width: 900px;height:560px" data-dojo-props="title:'更新/查看订单信息'">
 		<table cellpadding="5" cellspacing="5" border="0" style="width:100%;height:100%">
 			<tr>
 				<td>订单编号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtOrderID" data-dojo-id="TxtOrderID" data-dojo-props="readOnly: true"></div></td>
@@ -247,11 +305,22 @@
 			</tr>
 			<tr>
 				<td align="left">
+					<div data-dojo-type="dijit/form/TextBox" style="display:none" data-dojo-props="readOnly: true" id="TxtUuid" data-dojo-id="TxtUuid"></div>
 					<button id="updateButton" type="button" data-dojo-id="updateButton" data-dojo-type="dijit/form/Button">更新订单物流信息</button>
 				</td>
 				<td colspan="2" align="right">
 					<button id="closeButton" type="button" data-dojo-id="closeButton" onclick="UpdateOrderInfoDlg.hide();" data-dojo-type="dijit/form/Button">关闭窗口</button>
 				</td>
+			</tr>
+		</table>
+	</div>
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="UserMsgDlg" id="UserMsgDlg" style="width:300px;height:100px" data-dojo-props="title: '消息'">
+		<table cellpadding="10" cellspacing="0" border="0" style="width:100%;height:60px">
+			<tr>
+				<td><span id="usermsgtxt"></span></td>
+			</tr>
+			<tr>
+				<td align="right"><button id="closeMsgButton" type="button" data-dojo-id="closeMsgButton" onclick="UserMsgDlg.hide()" data-dojo-type="dijit/form/Button">关闭</button></td>
 			</tr>
 		</table>
 	</div>
