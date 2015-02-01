@@ -1,0 +1,32 @@
+<server description="new server">
+
+    <!-- Enable features -->
+    <featureManager>
+        <feature>jsp-2.2</feature>
+        <feature>jdbc-4.0</feature>
+    	<feature>jaxrs-1.1</feature>
+		<feature>jpa-2.0</feature>
+	    <feature>localConnector-1.0</feature>
+        <feature>wab-1.0</feature>
+    	<feature>json-1.0</feature>
+	</featureManager>
+
+    <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
+    <httpEndpoint httpPort="9080" httpsPort="9443" id="defaultHttpEndpoint"/>
+
+    <dataSource id="ctripdb" jndiName="jdbc/ctripdb">
+        <jdbcDriver>
+            <library name="derbyLib">
+                <fileset dir="${shared.resource.dir}" includes="derbyclient.jar"/>
+            </library>
+            
+        </jdbcDriver>
+        <properties.derby.client createDatabase="create" databaseName="ctripdb" password="{xor}Lyg7"/>
+    </dataSource>
+
+    <applicationMonitor updateTrigger="mbean"/>
+
+    <osgiApplication id="CtripMall" location="CtripMall.eba" name="CtripMall"/>
+    <jndiEntry value="${shared.resource.dir}/securityKey.properties" jndiName="keyFile"></jndiEntry>
+    <jndiEntry jndiName="ctripurl" value="${shared.resource.dir}/ctripUrl.properties"></jndiEntry>
+</server>
