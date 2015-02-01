@@ -7,25 +7,31 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.ibm.json.java;version="1.0.0",
  javax.crypto,
  javax.crypto.spec,
+ javax.el;version="2.0",
  javax.naming,
- javax.sql;version="0.0.0",
  javax.persistence,
  javax.persistence.criteria,
  javax.persistence.metamodel,
- javax.transaction;version="1.1.0",
- javax.el;version="2.0",
  javax.servlet;version="2.5",
  javax.servlet.annotation,
  javax.servlet.http;version="2.5",
  javax.servlet.jsp;version="2.0",
  javax.servlet.jsp.el;version="2.0",
  javax.servlet.jsp.tagext;version="2.0",
+ javax.sql;version="0.0.0",
+ javax.transaction;version="1.1.0",
  javax.ws.rs;version="1.0.0",
  javax.ws.rs.core;version="1.0.0",
- javax.ws.rs.ext;version="1.0.0"
+ javax.ws.rs.ext;version="1.0.0",
+ org.apache.wink.client
 Export-Package: cn.lynx.ctripmall.rest,
  cn.lynx.ctripmall.rest.model
 Web-ContextPath: /CtripMall
-Bundle-ClassPath: WEB-INF/classes,.,
- WEB-INF/lib/commons-codec-1.10.jar
+Bundle-ClassPath: WEB-INF/classes,
+ .,
+ WEB-INF/lib/commons-codec-1.10.jar,
+ WEB-INF/lib/wink-client-1.4.jar,
+ WEB-INF/lib/wink-common-1.4.jar,
+ WEB-INF/lib/jackson-all-1.9.11.jar,
+ WEB-INF/lib/wink-jackson-provider-1.4.jar
 

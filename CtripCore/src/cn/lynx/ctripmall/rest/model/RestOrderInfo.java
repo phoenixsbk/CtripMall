@@ -43,4 +43,35 @@ public class RestOrderInfo {
 		
 		return doi;
 	}
+	
+	public static String toJSONCtrip(OrderInfo oi) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{ ");
+		sb.append("\"orderid\":" + oi.getOrderId() + ",");
+		sb.append("\"timestamp\":" + oi.getTimestamp() + ",");
+		sb.append("\"flowcompanyname\":\"" + oi.getFlowInfo().getFlowCompanyName() + "\",");
+		sb.append("\"flowticketnumber\":\"" + oi.getFlowInfo().getFlowTicketNumber() + "\",");
+		sb.append("\"flowstatus\":" + oi.getFlowInfo().getFlowStatus() + ",");
+		sb.append("\"flowremark\":\"" + oi.getFlowInfo().getFlowRemark() + "\",");
+		sb.append("\"productlist\": [");
+		
+		int psize = oi.getProductList().size();
+		for (int i = 0;i < psize;i ++) {
+			if (i != 0) {
+				sb.append(",");
+			}
+			
+			Product p = oi.getProductList().get(i);
+			
+			sb.append("{ ");
+			sb.append("\"exproductid\":\"" + p.getExProductId() + "\",");
+			sb.append("\"exsubproductid\":\"" + p.getExSubProductId() + "\",");
+			sb.append("\"quantity\":" + p.getQuantity());
+			sb.append(" }");
+		}
+		
+		sb.append("] }");
+		
+		return sb.toString();
+	}
 }

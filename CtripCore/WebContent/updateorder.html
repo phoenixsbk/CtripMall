@@ -20,54 +20,8 @@
 	var reqHost = "api.mall.ctrip.com";
 	var reqURI = "/mall-api/openapi/updateorderdelivery";
 
-	var tdtag1a = "<tr><td width='250' align='right'><span for='ExProductID";
-	var tdtag1b = "' id='Span_ExProductID";
-	var tdtag1c = "'>商品编号:</span></td><td><input type='text' id='ExProductID";
-	var tdtag1d = "' name='ExProductID";
-	var tdtag1e = "' /></td></tr>";
-
-	var tdtag2a = "<tr><td align='right'><span for='ExSubProductID";
-	var tdtag2b = "' id='Span_ExSubProductID";
-	var tdtag2c = "'>子商品编号:</span></td><td><input type='text' id='ExSubProductID";
-	var tdtag2d = "' name='ExSubProductID";
-	var tdtag2e = "' /></td></tr>";
-
-	var tdtag3a = "<tr><td align='right'><span for='Quantity";
-	var tdtag3b = "' id='Span_Quantity";
-	var tdtag3c = "'>数量:</span></td><td><input type='text' id='Quantity";
-	var tdtag3d = "' name='Quantity";
-	var tdtag3e = "'/></td></tr>";
-
-	var tdtag4 = "<tr><td colspan='2'>&nbsp;</td></tr>";
-
 	function hmacmd5_crypt(data, key) {
 		return CryptoJS.HmacMD5(data, key);
-	}
-
-	function AddProduct() {
-		require([ "dojo/dom", "dojo/dom-construct" ], function(dom, domc) {
-			var counter = dom.byId("ProductCount").innerHTML;
-			counter = Number(counter) + 1;
-			dom.byId("ProductCount").innerHTML = counter;
-			var tag1 = tdtag1a + counter + tdtag1b + counter + tdtag1c
-					+ counter + tdtag1d + counter + tdtag1e;
-			var pr1 = domc.toDom(tag1);
-			domc.place(pr1, "ProductTable", "last");
-
-			var tag2 = tdtag2a + counter + tdtag2b + counter + tdtag2c
-					+ counter + tdtag2d + counter + tdtag2e;
-			var pr2 = domc.toDom(tag2)
-			domc.place(pr2, "ProductTable", "last");
-
-			var tag3 = tdtag3a + counter + tdtag3b + counter + tdtag3c
-					+ counter + tdtag3d + counter + tdtag3e;
-			var pr3 = domc.toDom(tag3);
-			domc.place(pr3, "ProductTable", "last");
-
-			var tag4 = tdtag4;
-			var pr4 = domc.toDom(tag4);
-			domc.place(pr4, "ProductTable", "last");
-		});
 	}
 
 	function submitCtrip() {

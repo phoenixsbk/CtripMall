@@ -43,7 +43,6 @@ public class AdminOrderResources {
 			} else {
 				param = null;
 			}
-			
 			return CtripDBMgr.getInstance().queryEntitiesByProperties(OrderInfo.class, param, -1);
 		} else {
 			return CtripDBMgr.getInstance().queryEntitiesByProperties(OrderInfo.class, null, -1);
