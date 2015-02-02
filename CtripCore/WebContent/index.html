@@ -16,6 +16,7 @@
 			"dijit/layout/ContentPane", "dijit/form/TextBox",
 			"dijit/form/Button", "dojo/date/locale"]);
 	var REST_ORDER_TYPE = "rest/admin/orderinfo/type/";
+	var REST_REFUND_TYPE = "rest/admin/refundinfo/type/";
 	require(["dojo/on", "dojo/ready", "dojo/request/xhr", "dojo/store/Memory",
 	         "dojo/data/ObjectStore", "dojo/dom"], function(on, ready, xhr, Memory, ObjectStore, dom) {
 		ready(function() {
@@ -40,9 +41,79 @@
 					});
 			});
 			
+			on(closeRefreshButton, "click", function() {
+				UpdateOrderInfoDlg.hide();
+				
+				standbyForGrid.show();
+				
+				var ordertype = OrderTypeSelect.value;
+				xhr.get(REST_ORDER_TYPE + ordertype, {
+					handleAs: "json",
+					preventCache: true
+				}).then(
+					function (resp) {
+						standbyForGrid.hide();
+						var datastore = new Memory({data : resp});
+						var store = new ObjectStore({objectStore: datastore});
+						OrderListGrid.setStore(store);
+						OrderListGrid.startup();
+					},
+					function (error) {
+						standbyForGrid.hide();
+						console.log(error);
+					});
+			});
+			
+			on(RefreshRefundButton, "click", function() {
+				standbyForRefundGrid.show();
+				
+				var refundtype = RefundTypeSelect.value;
+				xhr.get(REST_REFUND_TYPE + refundtype, {
+					handleAs: "json",
+					preventCache: true
+				}).then(
+					function (resp) {
+						standbyForRefundGrid.hide();
+						
+						var datastore = new Memory({data: resp});
+						var store = new ObjectStore({objectStore: datastore});
+						RefundListGrid.setStore(store);
+						RefundListGrid.startup();
+					},
+					function (error) {
+						standbyForRefundGrid.hide();
+						console.log(error);
+					}
+				);
+			});
+			
+			on(closeRefreshRefundButton, "click", function() {
+				UpdateRefundDlg.hide();
+				
+				standbyForRefundGrid.show();
+				
+				var refundtype = RefundTypeSelect.value;
+				xhr.get(REST_REFUND_TYPE + refundtype, {
+					handleAs: "json",
+					preventCache: true
+				}).then(
+					function (resp) {
+						standbyForRefundGrid.hide();
+						
+						var datastore = new Memory({data: resp});
+						var store = new ObjectStore({objectStore: datastore});
+						RefundListGrid.setStore(store);
+						RefundListGrid.startup();
+					},
+					function (error) {
+						standbyForRefundGrid.hide();
+						console.log(error);
+					}
+				);
+			});
+			
 			on(OrderListGrid, "rowclick", function(e) {
 				var selItem = OrderListGrid.getItem(e.rowIndex);
-				console.log(selItem.productList);
 				var datastore = new Memory({data : selItem.productList});
 				var store = new ObjectStore({objectStore: datastore});
 				OrderProductTable.setStore(store);
@@ -51,6 +122,18 @@
 				fillUpdateOrderDlg(selItem);
 				
 				UpdateOrderInfoDlg.show();
+			});
+			
+			on(RefundListGrid, "rowclick", function(e) {
+				var selItem = RefundListGrid.getItem(e.rowIndex);
+				var datastore = new Memory({data : selItem.productList});
+				var store = new ObjectStore({objectStore: datastore});
+				RefundProductTable.setStore(store);
+				RefundProductTable.startup();
+				
+				fillUpdateRefundDlg(selItem);
+				
+				UpdateRefundDlg.show();
 			});
 			
 			on(updateButton, "click", function() {
@@ -81,8 +164,66 @@
 					}
 				);
 			});
+			
+			on(updateRefundButton, "click", function() {
+				if (RefundFlowCompanyName.value == "" || RefundFlowTicketNumber.value == "") {
+					dom.byId("usermsgtxt").innerHTML = "未输入物流公司名称或物流运单号";
+					UserMsgDlg.show();
+					return;
+				}
+				
+				xhr.post("rest/ctrip/refundinfo/" + TxtRefundUuid.value, {
+					handleAs: "json",
+					preventCache: true,
+					headers: { "Content-Type" : "application/x-www-form-urlencoded; charset=utf-8" },
+					data: {
+						flowcompanyname: RefundFlowCompanyName.value,
+						flowticketnumber: RefundFlowTicketNumber.value,
+						flowstatus: Number(RefundFlowStatus.value),
+						flowremark: RefundFlowRemark.value
+					}
+				}).then(
+					function(resp) {
+						dom.byId("usermsgtxt").innerHTML = resp.resultmessage;
+						UserMsgDlg.show();
+					},
+					function(error) {
+						dom.byId("usermsgtxt").innerHTML = error;
+						UserMsgDlg.show();
+					}
+				);
+			});
 		})
 	});
+	
+	var fillUpdateRefundDlg = function(refundItem) {
+		TxtRefundUuid.set("value", "");
+		TxtRefundApplyId.set("value", "");
+		TxtOperateType.set("value", "");
+		TxtRefundOrderId.set("value", "");
+		TxtRefundTimeStamp.set("value", "");
+		TxtRefundRemark.set("value", "");
+		
+		RefundFlowCompanyName.set("value", "");
+		RefundFlowTicketNumber.set("value", "");
+		RefundFlowStatus.set("value", 0);
+		RefundFlowRemark.set("value", "");
+		
+		TxtRefundUuid.set("value", refundItem.uuid);
+		TxtRefundApplyId.set("value", refundItem.refundApplyId);
+		var txtoptype = refundItem.operateType == 0 ? "退货" : "换货";
+		TxtOperateType.set("value", txtoptype);
+		TxtRefundOrderId.set("value", refundItem.orderInfo.orderId);
+		TxtRefundTimeStamp.set("value", refundItem.timestamp);
+		TxtRefundRemark.set("value", refundItem.remark);
+		
+		if (refundItem.flowInfo != null) {
+			RefundFlowCompanyName.set("value", refundItem.flowInfo.flowCompanyName);
+			RefundFlowTicketNumber.set("value", refundItem.flowInfo.flowTicketNumber);
+			RefundFlowStatus.set("value", refundItem.flowInfo.flowStatus);
+			RefundFlowRemark.set("value", refundItem.flowInfo.flowRemark);
+		}
+	};
 	
 	var fillUpdateOrderDlg = function(orderItem) {
 		TxtUuid.set("value", "");
@@ -136,6 +277,16 @@
 		return dojo.date.locale.format(d);
 	};
 	
+	var operateFormatter = function(item) {
+		if (item == 0) {
+			return "退货";
+		} else if (item == 1) {
+			return "换货";
+		} else {
+			return "未知类型";
+		}
+	};
+	
 	var productFormatter = function(item) {
 		var productNames = "";
 		for (var i in item) {
@@ -145,6 +296,20 @@
 			productNames += item[i].productName;
 		}
 		return productNames;
+	};
+	
+	var orderFormatter = function(item) {
+		return item.orderId;
+	};
+	
+	var selectMyTab = function(tabId) {
+		require(["dijit/registry"], function(registry) {
+			var tc = registry.byId("MainTab");
+			var mytab = registry.byId(tabId);
+			
+			tc.selectChild(mytab);
+			tc.resize();
+		});
 	}
 	
 	/*
@@ -183,16 +348,10 @@
 				<tr>
 					<td align="left" height="26px"><div data-dojo-type="dijit/Toolbar">
 						<div data-dojo-type="dijit/form/DropDownButton">
-							<span>首页</span>
-							<div data-dojo-type="dijit/DropDownMenu">
-								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">首页</div>
-							</div>
-						</div>
-						<div data-dojo-type="dijit/form/DropDownButton">
 							<span>查看</span>
 							<div data-dojo-type="dijit/DropDownMenu">
-								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">查看/刷新订单信息</div>
-								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">查看/刷新退换货订单信息</div>
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="onClick: function() {selectMyTab('OrderPane')}">查看/刷新订单信息</div>
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="onClick: function() {selectMyTab('RefundPane')}">查看/刷新退换货订单信息</div>
 							</div>
 						</div>
 						<div data-dojo-type="dijit/form/DropDownButton">
@@ -204,7 +363,7 @@
 					</div></td>
 			</table>
 		</div>
-		<div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region: 'center'" style="width:1200px;height:100%">
+		<div data-dojo-type="dijit/layout/TabContainer" data-dojo-props="region: 'center'" style="width:1200px;height:100%" data-dojo-id="MainTab" id="MainTab">
 			<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="title: '订单信息'" style="height:100%" data-dojo-id="OrderPane" id="OrderPane">
 				<div style="width:100%;height: 25px">
 					<div data-dojo-type="dijit/form/Select" data-dojo-id="OrderTypeSelect" id="OrderTypeSelect">
@@ -232,7 +391,28 @@
 				</div>
 			</div>
 			<div data-dojo-type="dijit/layout/ContentPane" data-dojo-props="title: '退换货信息'" style="height:100%" data-dojo-id="RefundPane" id="RefundPane">
-				bbc
+				<div style="width:100%;height: 25px">
+					<div data-dojo-type="dijit/form/Select" data-dojo-id="RefundTypeSelect" id="RefundTypeSelect">
+						<span value="RefundNew">新收到的退换货申请</span>
+						<span value="RefundFlow">已配送/已更新退换货</span>
+						<span value="RefundAll">全部退换货</span>
+					</div>
+					<button type="button" data-dojo-type="dijit/form/Button" data-dojo-id="RefreshRefundButton" id="RefreshRefundButton">刷新/载入</button>
+				</div>
+				<div style="width:100%;height:565px">
+					<table data-dojo-type="dojox/grid/DataGrid" data-dojo-id="RefundListGrid" id="RefundListGrid" data-dojo-props="selectable: false" style="width:100%;height:565px">
+						<thead>
+							<tr>
+								<th field="refundApplyId" align="center" width="100px"><span style="text-align: center;font-weight: bold">退换货申请编号</span></th>
+								<th field="timestamp" align="center" width="150px" formatter="dateFormatter"><span style="text-align: center;font-weight: bold">当前时间</span></th>
+								<th field="operateType" align="center" width="150px" formatter="operateFormatter"><span style="text-align:center;font-weight:bold">退换货类型</span></th>
+								<th field="orderInfo" align="center" width="150px" formatter="orderFormatter"><span style="text-align: center;font-weight: bold">订单编号</span></th>
+								<th field="productList" align="center" width="450px" formatter="productFormatter"><span style="text-align: center;font-weight: bold">订单商品列表</span></th>
+							</tr>
+						</thead>
+					</table>
+					<div data-dojo-id="standbyForRefundGrid" data-dojo-type="dojox/widget/Standby" image="images/loading.gif" data-dojo-props="target: 'RefundListGrid'"></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -308,12 +488,81 @@
 					<div data-dojo-type="dijit/form/TextBox" style="display:none" data-dojo-props="readOnly: true" id="TxtUuid" data-dojo-id="TxtUuid"></div>
 					<button id="updateButton" type="button" data-dojo-id="updateButton" data-dojo-type="dijit/form/Button">更新订单物流信息</button>
 				</td>
-				<td colspan="2" align="right">
+				<td align="center">
+					<button id="closeRefreshButton" type="button" data-dojo-id="closeRefreshButton" data-dojo-type="dijit/form/Button">关闭并刷新</button>
+				</td>
+				<td align="right">
 					<button id="closeButton" type="button" data-dojo-id="closeButton" onclick="UpdateOrderInfoDlg.hide();" data-dojo-type="dijit/form/Button">关闭窗口</button>
 				</td>
 			</tr>
 		</table>
 	</div>
+	
+	<!-- Popup dialog window for refund update -->
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="UpdateRefundDlg" id="UpdateRefundDlg" style="width: 900px;height:460px" data-dojo-props="title:'更新/查看退换货信息'">
+		<table cellpadding="5" cellspacing="5" border="0" style="width:100%;height:100%">
+			<tr>
+				<td>退换货申请编号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtRefundApplyId" data-dojo-id="TxtRefundApplyId" data-dojo-props="readOnly: true"></div></td>
+				<td>当前时间:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtRefundTimeStamp" data-dojo-id="TxtRefundTimeStamp" data-dojo-props="readOnly: true"></div></td>
+				<td>退换货类型:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtOperateType" data-dojo-id="TxtOperateType" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td>订单号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="TxtRefundOrderId" data-dojo-id="TxtRefundOrderId" data-dojo-props="readOnly: true"></div></td>
+				<td colspan="2">配送备注:&nbsp;<div data-dojo-type="dijit/form/TextBox" style="width:400px" id="TxtRefundRemark" data-dojo-id="TxtRefundRemark" data-dojo-props="readOnly: true"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3" style="width:900px;height:180px">
+					订单商品:&nbsp;
+					<table data-dojo-type="dojox/grid/DataGrid" style="width:100%;height:80%" data-dojo-props="selectable: false" id="RefundProductTable" data-dojo-id="RefundProductTable">
+						<thead>
+							<tr>
+								<th field="exProductId" width="120px">商品编号</th>
+								<th field="exSubProductId" width="120px">子商品编号</th>
+								<th field="productName" width="200px">商品名称</th>
+								<th field="quantity" width="50px">数量</th>
+								<th field="price" width="50px">价格</th>
+								<th field="experience" width="50px">积分</th>
+								<th field="settlePrice" width="50px">结算比例</th>
+								<th field="color" width="50px">颜色</th>
+								<th field="size" width="50px">尺寸</th>
+							</tr>
+						</thead>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="3">物流公司名称:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="RefundFlowCompanyName" data-dojo-id="RefundFlowCompanyName"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">物流订单编号:&nbsp;<div data-dojo-type="dijit/form/TextBox" id="RefundFlowTicketNumber" data-dojo-id="RefundFlowTicketNumber"></div></td>
+			</tr>
+			<tr>
+				<td colspan="3">物流配送状态:&nbsp;<select name="RefundFlowStatus" id="RefundFlowStatus"
+					data-dojo-id="RefundFlowStatus" data-dojo-type="dijit/form/Select">
+						<option value="0">配送中</option>
+						<option value="1">配送成功</option>
+						<option value="2">配送失败</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td colspan="3" valign="top">物流备注:&nbsp;<div data-dojo-type="dijit/form/TextBox" style="width:500px;height:40px" id="RefundFlowRemark" data-dojo-id="RefundFlowRemark"></div></td>
+			</tr>
+			<tr>
+				<td align="left">
+					<div data-dojo-type="dijit/form/TextBox" style="display:none" data-dojo-props="readOnly: true" id="TxtRefundUuid" data-dojo-id="TxtRefundUuid"></div>
+					<button id="updateRefundButton" type="button" data-dojo-id="updateRefundButton" data-dojo-type="dijit/form/Button">更新退换货物流信息</button>
+				</td>
+				<td align="center">
+					<button id="closeRefreshRefundButton" type="button" data-dojo-id="closeRefreshRefundButton" data-dojo-type="dijit/form/Button">关闭并刷新</button>
+				</td>
+				<td align="right">
+					<button id="closeRefundButton" type="button" data-dojo-id="closeRefundButton" onclick="UpdateRefundDlg.hide();" data-dojo-type="dijit/form/Button">关闭窗口</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	
+	<!-- General message window -->
 	<div data-dojo-type="dijit/Dialog" data-dojo-id="UserMsgDlg" id="UserMsgDlg" style="width:300px;height:100px" data-dojo-props="title: '消息'">
 		<table cellpadding="10" cellspacing="0" border="0" style="width:100%;height:60px">
 			<tr>

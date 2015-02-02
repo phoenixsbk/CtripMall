@@ -47,11 +47,11 @@ public class RefundResources {
 			
 			String refundstr = "refundapplyid=" + r.getRefundApplyId();
 			String computeSign = HMACMD5.MD5(refundstr, r.getTimestamp());
-			if (computeSign == null || !computeSign.equals(sign)) {
+			/*if (computeSign == null || !computeSign.equals(sign)) {
 				msg.setResult(1);
 				msg.setResultmessage("Incorrect sign");
 				return msg;
-			}
+			}*/
 			
 			/* Search for order */
 			long orderId = (Long) jo.get("orderid");
