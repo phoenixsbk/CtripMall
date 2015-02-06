@@ -357,7 +357,7 @@
 						<div data-dojo-type="dijit/form/DropDownButton">
 							<span>帮助</span>
 							<div data-dojo-type="dijit/DropDownMenu">
-								<div data-dojo-type="dijit/MenuItem" data-dojo-props="">帮助</div>
+								<div data-dojo-type="dijit/MenuItem" data-dojo-props="onClick: function() {HelpDlg.show()}">帮助</div>
 							</div>
 						</div>
 					</div></td>
@@ -574,5 +574,34 @@
 		</table>
 	</div>
 	<div data-dojo-id="standByForReg" data-dojo-type="dojox/widget/Standby" image="images/loading.gif" data-dojo-props="target: 'RegVMPane'"></div>
+	
+	<div data-dojo-type="dijit/Dialog" data-dojo-id="HelpDlg" id="HelpDlg" style="width:700px;height:500px" data-dojo-props="title: '帮助'">
+		<table cellpadding="5" cellspacing="5" border="0" style="width:100%;height:100%">
+			<tr>
+				<td>更新退换货标签界面: </td>
+			</tr>
+			<tr>
+				<td>1. 该界面提供了下拉框与载入／刷新按钮，以用于载入不同类型的订单。订单信息会从携程处推送到下面的表格。</td>
+			</tr>
+			<tr>
+				<td>2. 当选择了下拉框以后，点击载入／刷新按钮，将会载入对应类型的订单。</td>
+			</tr>
+			<tr>
+				<td>3. 订单的条目分别描述了订单的订单号，发送到系统的时间，下单时间，发票信息以及商品的平铺列表信息。</td>
+			</tr>
+			<tr>
+				<td>4. 对想要查看或更新的订单条目进行单击，则会弹出订单的具体信息。</td>
+			</tr>
+			<tr>
+				<td>5. 对于订单信息中的物流信息，可以更新。注意：一旦对物流信息进行了更新并点击更新按钮以后，将会把物流信息发送给携程。</td>
+			</tr>
+			<tr>
+				<td>6. 订单具体信息的对话框中，出了更新按钮外，还可以关闭，关闭并刷新。关闭按钮是简单地关闭这个订单信息窗口，不进行任何修改。关闭并刷新一般用于在更新了订单物流信息之后，关闭窗口，并刷新订单列表界面使用。</td>
+			</tr>
+			<tr>
+				<td align="right"><button id="closeHelpButton" data-dojo-id="closeHelpButton" type="button" data-dojo-type="dijit/form/Button" onclick="HelpDlg.hide()">关闭</button></td>
+			</tr>
+		</table>
+	</div>
 </body>
 </html>
